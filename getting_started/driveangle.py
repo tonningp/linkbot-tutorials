@@ -1,6 +1,6 @@
 import linkbot
 
-robot = linkbot.CLinkbot("P3S1")
+robot = linkbot.CLinkbot("ABCD") # change to your Id
 
 radius = 1.75  # if you are using the blue wheels, 2.0 if using the teal wheels
 trackwidth = 3.69
