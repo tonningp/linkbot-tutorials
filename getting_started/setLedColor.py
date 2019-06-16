@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import linkbot
 
 robot = linkbot.CLinkbot("P3S1")  # put the serial id of the linkbot in the string
