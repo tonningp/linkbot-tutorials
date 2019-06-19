@@ -5,6 +5,10 @@ import linkbot3.async as linkbot
 import asyncio
 import time
 
+async def get_bot(serial_id):
+  l = await linkbot.AsyncLinkbot.create(serial_id)
+  return l
+
 def half_step(n):
     a = 1.059463094359
     f0 = 440
@@ -27,13 +31,15 @@ base_notes = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
 notes = { "{}{}".format(base_notes[i%12],i//12) : x for i,x in list(enumerate([half_step(x) for x in range(-57,51)])) }
 
 async def play_tone(robot,freq,duration):
-  robot.set_buzzer_frequency(freq)
+  await robot.buzzer.set_frequency(freq)
   await asyncio.sleep(duration)
-  robot.set_buzzer_frequency(0)
+  await robot.buzzer.set_frequency(0)
  
 async def play_score(serial_id,score,tempo):
-    for freq,duration in [(notes[n.upper()],durations[d]) for n,d in score]:
-        play_tone(robot,freq,duration*tempo)
+   while True:
+      robot = await get_bot(serial_id)
+      for freq,duration in [(notes[n.upper()],durations[d]) for n,d in score]:
+          await play_tone(robot,freq,duration*tempo)
         
 hobbits = [
     # https://www.8notes.com/scores/435.asp
@@ -52,7 +58,8 @@ hobbits = [
 ]
 
 
-async def task(l):
+async def task(serial_id):
+    l = await get_bot(serial_id)
     accel = await l.motors[0].accel()
     decel = await l.motors[0].decel()
     print('Current accel, decel values: ', await accel, await decel)
@@ -106,18 +113,14 @@ async def task2(serial_id):
     print(serial_id+' it works')
     await asyncio.sleep(0.5)
 
-async def get_bot(serial_id):
-  l = await linkbot.AsyncLinkbot.create(serial_id)
-  return l
 
-async def run_main():
+#async def run_main():
   #asyncio.run(multiple_tasks('6J3Q'))
 
 if __name__ == '__main__':
   loop = asyncio.get_event_loop()
   loop.run_until_complete(asyncio.gather(
-    task(l),
-    #task2('6J3Q'),
-    play_score(l,hobbits,0.5)
+    play_score('6J3Q',hobbits,1.0),
+    task('6J3Q'),
 ))
   loop.close() 
